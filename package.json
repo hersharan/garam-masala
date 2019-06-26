@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www --exec babel-node",
+    "build": "rm -rf ./build && mkdir build && babel --out-dir ./build --source-maps --copy-files ./ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log",
+    "clean": "rimraf build"
   },
   "dependencies": {
     "cookie-parser": "~1.4.3",
@@ -13,6 +16,13 @@
     "helmet": "^3.18.0",
     "http-errors": "~1.6.2",
     "mongodb": "^3.2.7",
-    "morgan": "~1.9.0"
+    "morgan": "~1.9.0",
+    "rimraf": "^2.6.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.24.1",
+    "nodemon": "^1.19.1"
   }
 }

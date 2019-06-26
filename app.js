@@ -1,5 +1,6 @@
+import express from 'express';
 var createError = require('http-errors');
-var express = require('express');
+// var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -54,7 +55,7 @@ const dbName = 'garam-masala';
 // Use connect method to connect to the server
 MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
-  console.log("Connected successfully to server");
+  console.log("Connected successfully to mongo server");
 
   const db = client.db(dbName);
 
