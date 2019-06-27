@@ -3,8 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
-    "dev": "nodemon ./bin/www --exec babel-node",
+    "start": "nodemon ./bin/www --exec babel-node",
     "build": "rm -rf ./build && mkdir build && babel --out-dir ./build --source-maps --copy-files ./ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log",
     "clean": "rimraf build"
   },
