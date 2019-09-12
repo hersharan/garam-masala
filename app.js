@@ -1,14 +1,12 @@
-import express from 'express';
+var express = require('express');
 var createError = require('http-errors');
-// var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var helmet = require('helmet');
-var MongoClient = require('mongodb').MongoClient
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var apiRouter = require('./routes/api');
 
 var app = express();
 app.use(helmet())
@@ -19,12 +17,23 @@ app.set('view engine', 'hbs');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+
+// Validates required headers
+app.use(function(req, res, next) {
+  if (req.headers['content-type'] !== 'application/json') {
+    res.status(400).send('Request does not contain Content-Type header');
+  }
+
+  next();
+});
+
+// APIs
+app.use('/api/v1/', apiRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -42,24 +51,5 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-// Mongo connection test
-
-const assert = require('assert');
-
-// Connection URL
-const url = 'mongodb://localhost:27017';
-
-// Database Name
-const dbName = 'garam-masala';
-
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
-  assert.equal(null, err);
-  console.log("Connected successfully to mongo server");
-
-  const db = client.db(dbName);
-
-  client.close();
-});
 
 module.exports = app;
