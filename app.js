@@ -32,6 +32,20 @@ app.use(function(req, res, next) {
   next();
 });
 
+// Error Handler for Body Empty Check
+app.use(function(req, res, next) {
+  if (req.method === 'POST' &&
+    (req.body instanceof Object && Object.keys(req.body).length === 0) || req.body instanceof Array && req.body.length === 0) {
+    res.status(400).send({
+      "status": 400,
+      "msg": "Body should not be empty"
+    });
+  }
+  else {
+    next();
+  }
+});
+
 // APIs
 app.use('/api/v1/', apiRouter);
 

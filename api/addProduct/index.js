@@ -1,10 +1,13 @@
+const mongoose = require('mongoose');
 const database = require("../../database");
 const Joi = require("@hapi/joi");
 const emptyValidator = Joi.empty();
 const isBase64 = require("is-base64");
 const fs = require('fs');
 const ProductSchema = require('./schema');
-const filesFolder = './public/files';
+const filesFolder = `./public/files`;
+let extension;
+let imageFile;
 
 async function addProduct(productInfo) {
   const db = await database.connection();
@@ -55,13 +58,14 @@ async function addProduct(productInfo) {
     // Saving Image
     const imageData = image.split(',')[1];
     const imageExt = image.split(',')[0];
-    const extension = imageExt.split(',')[0].substring(
+    extension = imageExt.split(',')[0].substring(
       imageExt.split(',')[0].lastIndexOf("/") + 1,
       imageExt.split(',')[0].lastIndexOf(";")
     );
 
     if (extension === 'jpeg' || extension === 'png' || extension === 'jpg') {
-      await fs.writeFile(`${filesFolder}/${fileName}`, imageData, 'base64', function(err) {
+      imageFile = mongoose.Types.ObjectId();
+      await fs.writeFile(`${filesFolder}/${imageFile}_${fileName}.${extension}`, imageData, 'base64', function(err) {
         return {
           error: {
             status: 400,
@@ -78,13 +82,13 @@ async function addProduct(productInfo) {
         }
       }
     }
-
   }
 
   const product = new ProductSchema({
     title,
     description,
-    image: fileName
+    image: `${imageFile}_${fileName}`,
+    extension
   })
 
   const mongoStatus = await product.save().catch(err => err);
