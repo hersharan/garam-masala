@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var userProfile = require('../api/userRegistration/user');
+var userProfile = require('../api/userRegistration');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {

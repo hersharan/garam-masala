@@ -16,5 +16,5 @@ async function dbConnection() {
 
 // Use connect method to connect to the server
 module.exports = {
-  connection: dbConnection,
+  connection: dbConnection
 }

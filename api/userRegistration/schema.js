@@ -2,9 +2,6 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const Schema = mongoose.Schema;
 
-// Initialize UserId Generator
-let userId = 0;
-
 const UsersSchema = new Schema({
   salutation: String,
   firstName: String,
@@ -12,7 +9,6 @@ const UsersSchema = new Schema({
   email: { type: String, match: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/},
   dob: Date,
   username: { type: String, lowercase: true, trim: true, sparse:true },
-  uid: { type: Number, default: userId, sparse:true},
   orders: {type: Array, default: 0},
   role: {type: Array, default: 1},
   createDate: { type: Date, default: Date.now},
@@ -36,11 +32,6 @@ UsersSchema.methods.validPassword = function(password) {
 
   return this.hash === hash;
 };
-
-UsersSchema.pre('save', function(next) {
-  this.uid = ++userId;
-  next();
-});
 
 const Users = mongoose.model('Users', UsersSchema);
 
