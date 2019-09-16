@@ -1,4 +1,8 @@
 .spinner {
+  width: 100vw;
+  height: 100vh;
+}
+.spinner .spinner-border {
   width: 10rem;
   height: 10rem;
 }
@@ -157,4 +161,84 @@ h2.active {
 .error-msg:before {
   content: "*";
 }
+
 /* Login End */
+
+/*Checkbox*/
+
+.checboxWrapper {
+  background-color: #5fbae9;
+  width: 71%;
+  border-radius: 50px;
+  margin-left: 15%;
+}
+
+.toggle_radio {
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 4px auto;
+  overflow: hidden;
+  padding: 0 !important;
+  -webkit-border-radius: 50px;
+  -moz-border-radius: 50px;
+  border-radius: 50px;
+  position: relative;
+  height: 26px;
+  width: 318px;
+}
+.toggle_radio > * {
+  float: left;
+}
+.toggle_radio input[type="radio"] {
+  display: none;
+  /*position: fixed;*/
+}
+.toggle_radio label {
+  font: 90%/1.618 "Source Sans Pro";
+  color: rgba(255, 255, 255, 0.9);
+  z-index: 0;
+  display: block;
+  width: 100px;
+  height: 20px;
+  margin: 3px 3px;
+  -webkit-border-radius: 50px;
+  -moz-border-radius: 50px;
+  border-radius: 50px;
+  cursor: pointer;
+  z-index: 1;
+  /*background: rgba(0,0,0,.1);*/
+  text-align: center;
+  /*margin: 0 2px;*/
+  /*background: blue;*/ /*make it blue*/
+}
+.toggle_option_slider {
+ font-weight: bold;
+  /*display: none;*/
+  /*background: red;*/
+  width: 100px;
+  height: 20px;
+  position: absolute;
+  top: 3px;
+  -webkit-border-radius: 50px;
+  -moz-border-radius: 50px;
+  border-radius: 50px;
+  -webkit-transition: all 0.4s ease;
+  -moz-transition: all 0.4s ease;
+  -o-transition: all 0.4s ease;
+  -ms-transition: all 0.4s ease;
+  transition: all 0.4s ease;
+}
+
+#first_toggle:checked ~ .toggle_option_slider {
+  background: rgba(255, 255, 255, 0.3);
+  left: 3px;
+}
+#second_toggle:checked ~ .toggle_option_slider {
+  background: rgba(255, 255, 255, 0.3);
+  left: 109px;
+}
+#third_toggle:checked ~ .toggle_option_slider {
+  background: rgba(255, 255, 255, 0.3);
+  left: 215px;
+}
+/*Checkbox end*/

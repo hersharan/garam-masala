@@ -25,6 +25,7 @@ export default class Login extends React.Component {
               initialValues={{ email: email, pass: pass }}
               validate={values => {
                 let errors = {};
+                
                 if (!values.email) {
                   errors.email = "Required";
                 }
@@ -80,7 +81,7 @@ export default class Login extends React.Component {
               </Form>
             </Formik>
             <div id="formFooter">
-              <Link to="#" className="underlineHover">
+              <Link to="/register" className="underlineHover">
                 Register
               </Link>
               <Link to="#" className="underlineHover">
