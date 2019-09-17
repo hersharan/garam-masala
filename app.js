@@ -25,8 +25,10 @@ app.use('/', indexRouter);
 
 // Validates required headers
 app.use(function(req, res, next) {
-  if (req.headers['content-type'] !== 'application/json') {
-    res.status(400).send('Request does not contain Content-Type header');
+  if (req.url.indexOf("/api/v1/") !== -1) {
+    if (req.headers['content-type'] !== 'application/json') {
+      res.status(400).send('Request does not contain Content-Type header');
+    }
   }
 
   next();
@@ -34,7 +36,7 @@ app.use(function(req, res, next) {
 
 // Error Handler for Body Empty Check
 app.use(function(req, res, next) {
-  if (req.method === 'POST' &&
+  if ((req.method === 'POST' || req.method === 'DELETE') &&
     (req.body instanceof Object && Object.keys(req.body).length === 0) || req.body instanceof Array && req.body.length === 0) {
     res.status(400).send({
       "status": 400,

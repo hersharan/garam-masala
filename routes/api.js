@@ -4,8 +4,9 @@ var userProfile = require('../api/userRegistration');
 var userLogin = require('../api/userLogin');
 var addProduct = require('../api/addProduct');
 var deleteProduct = require('../api/deleteProduct');
+var getProducts = require('../api/getProducts');
 
-/* GET home page. */
+/* Login */
 router.post('/login', async function(req, res, next) {
   const userInfo = await userLogin(req.body);
 
@@ -16,7 +17,7 @@ router.post('/login', async function(req, res, next) {
   }
 });
 
-/* GET home page. */
+/* Registration */
 router.post('/register', async function(req, res, next) {
   const userInfo = await userProfile(req.body);
 
@@ -27,7 +28,7 @@ router.post('/register', async function(req, res, next) {
   }
 });
 
-/* GET home page. */
+/* Add Product */
 router.post('/add-product', async function(req, res, next) {
   const productInfo = await addProduct(req.body);
 
@@ -38,9 +39,20 @@ router.post('/add-product', async function(req, res, next) {
   }
 });
 
-/* GET home page. */
+/* Delete Product */
 router.delete('/delete-product', async function(req, res, next) {
   const productInfo = await deleteProduct(req.body);
+
+  if (Object.prototype.hasOwnProperty.call(productInfo, 'error')) {
+    res.status(400).send(productInfo.error);
+  } else {
+    res.status(productInfo.status).send(productInfo.msg);
+  }
+});
+
+/* Get All Products */
+router.get('/products', async function(req, res, next) {
+  const productInfo = await getProducts(req.query);
 
   if (Object.prototype.hasOwnProperty.call(productInfo, 'error')) {
     res.status(400).send(productInfo.error);

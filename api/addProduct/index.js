@@ -4,28 +4,30 @@ const Joi = require("@hapi/joi");
 const emptyValidator = Joi.empty();
 const isBase64 = require("is-base64");
 const fs = require('fs');
-const ProductSchema = require('./schema');
+const {Schema} = require('./schema');
 const filesFolder = `./public/files`;
 let extension;
 let imageFile;
 
 async function addProduct(productInfo) {
   const db = await database.connection();
-  const { title, description, image, fileName } = productInfo;
-  if (!Object.prototype.hasOwnProperty.call(productInfo, "title")) {
+  const { title, description, image, fileName, details } = productInfo;
+  if (!Object.prototype.hasOwnProperty.call(productInfo, "title") ||
+    !Object.prototype.hasOwnProperty.call(productInfo, "details")) {
     return {
-      error: { status: 404, msg: "Title is mandatory" }
+      error: { status: 400, msg: "Title and details are mandatory" }
     };
   }
 
   if (
     emptyValidator.validate(title).error !== null ||
-    emptyValidator.validate(description).error !== null
+    emptyValidator.validate(description).error !== null ||
+    details.length === 0
   ) {
     return {
       error: {
         status: 400,
-        msg: "Title and should not be empty"
+        msg: "Title and details should not be empty"
       }
     };
   }
@@ -84,14 +86,34 @@ async function addProduct(productInfo) {
     }
   }
 
-  const product = new ProductSchema({
+  const product = new Schema.Products({
     title,
     description,
     image: `${imageFile}_${fileName}`,
     extension
-  })
+  });
 
-  const mongoStatus = await product.save().catch(err => err);
+  const productStatus = await product.save().catch(err => err);
+  let mongoStatus;
+  if ( productStatus.name !== "MongoError" && details !== undefined && details.length) {
+    details.forEach((item) => {
+      try {
+        const estimate = new Schema.Estimate({
+          weight: item.weight,
+          cost: item.cost,
+          pid: productStatus._id
+        });
+
+        mongoStatus = estimate.save().catch(err => err);
+      }
+      catch(err) {
+        console.log(err);
+      }
+    });
+  }
+  else {
+    return { status: 400, msg: 'details should not be empty' };
+  }
 
   if (
     mongoStatus !== undefined &&

@@ -8,6 +8,16 @@ const ProductsSchema = new Schema({
   extension: String,
 });
 
-const Products = mongoose.model('Products', ProductsSchema, 'products');
+const EstimateSchema = new Schema({
+  weight: {type: Number, default: 0},
+  cost: {type: Number, default: 0},
+  pid: String,
+});
 
-module.exports = Products;
+const Products = mongoose.model('Products', ProductsSchema, 'products');
+const Estimate = mongoose.model('Estimate', EstimateSchema, 'estimate');
+
+module.exports.Schema = {
+  Products: Products,
+  Estimate: Estimate
+};
