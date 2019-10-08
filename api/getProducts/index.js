@@ -1,15 +1,14 @@
-const mongoose = require('mongoose');
-const database = require("../../database");
-const Joi = require("@hapi/joi");
-const emptyValidator = Joi.string().empty();
+const mongoose = require("mongoose");
+const ProductModel = require("../../models/products");
+const EstimateModel = require("../../models/estimate");
 const filesFolder = `./public/files`;
 
-async function getProducts(product) {
-  let mongoStatus = [];
+function handleProductId(product) {
   let productsId = [];
-  const db = await database.connection();
-
-  if (product !== undefined && Object.prototype.hasOwnProperty.call(product, "id")) {
+  if (
+    product !== undefined &&
+    Object.prototype.hasOwnProperty.call(product, "id")
+  ) {
     if (product.id.length === 0) {
       return {
         error: {
@@ -17,85 +16,105 @@ async function getProducts(product) {
           msg: "Id should not be empty"
         }
       };
-    }
-    else {
+    } else {
       // To handle Single id.
-      if (typeof product.id === 'string') {
+      if (typeof product.id === "string") {
         productsId.push(product.id);
       }
       // To handle array of ids.
-      else if (typeof product.id === 'object') {
+      else if (typeof product.id === "object") {
         productsId = product.id;
       }
+
+      const ids = productsId.map(itm => mongoose.Types.ObjectId(itm));
+      return ids;
     }
   }
 
-  let data = [];
+  return null;
+}
 
-  if (productsId.length !== 0) {
-    const items = productsId.map(function(itm) {
+
+async function getDetails(id) {
+  return await EstimateModel.aggregate([
+    {
+      $match: {pid: mongoose.Types.ObjectId(id)}
+    },
+    { "$project": {
+      id: "$_id",
+      "weight": 1,
+      "cost": 1,
+      "_id": 0
+    }}
+  ]);
+}
+
+async function getProducts(product) {
+  let pid;
+  let products = [];
+  pid = handleProductId(product);
+
+  if (pid !== null && Object.prototype.hasOwnProperty.call(pid, "error")) {
+    return pid;
+  } else {
+    if (pid === null) {
       try {
-        return mongoose.Types.ObjectId(itm);
-      }
-      catch(err) {
-        console.log(err);
-      };
-    });
-
-    data = await db.collection('products').find({_id: {$in: items }}).toArray();
-  }
-  else {
-    data = await db.collection('products').find({}).toArray();
-  }
-
-  // Adding Required Details of weight and cost
-  if (data.name !== "MongoError" && data.length !== 0) {
-    const product = await db.collection('estimate').aggregate([
-      { $group : { _id : "$pid",
-          details: {
-            $push: {
-              weigth: "$weight",
-              cost: "$cost"
-            }
+        products = await ProductModel.find(
+          {},
+          {
+            _id: 1,
+            title: 1,
+            details: 1,
+            description: 1,
+            image: 1
           }
-        }
+        ).populate();
+      } catch (err) {
+        return {
+          error: {
+            status: 500,
+            msg: err.toString()
+          }
+        };
       }
-    ]).toArray();
-
-    function getDetails(id) {
-      const item = product.filter((itm) => String(itm._id) === String(id));
-      if (item.length !== 0) {
-        return item[0].details;
+    } else {
+      try {
+        products = await ProductModel.find(
+          { _id: { $in: pid } },
+          { _id: 1, title: 1, description: 1, image: 1 }
+        ).populate('details');
+      } catch (err) {
+        return {
+          error: {
+            status: 500,
+            msg: err.toString()
+          }
+        };
       }
     }
 
-    mongoStatus = data.map((item) => {
-      return ({
-        id: item._id,
-        title: item.title,
-        description: item.description ? item.description : '',
-        image: item.image ? `/files/${item.image}.${item.extension}` : '',
-        details: getDetails(item._id)
-      })
-    })
-  }
-  else {
-    return { status: 204, msg: '' };
-  }
+    if (products.length !== 0) {
+      const temp = products.map(async (item) => {
+        item.details = await getDetails(item._id);
+        item.image = `${filesFolder}/${item.image}`;
+        return item;
+      });
 
-  if (
-    mongoStatus !== undefined &&
-    Object.prototype.hasOwnProperty.call(mongoStatus, "name") &&
-    mongoStatus.name === "MongoError"
-  ) {
-    return { status: 500, msg: mongoStatus.errmsg };
-  }
+      const allProducts = await Promise.all(temp);
 
-  if (mongoStatus.length === 0) {
-    return { status: 204 };
-  }
-  else {
-    return { status: 200, msg: mongoStatus };
+      return {
+        error: {
+          status: 200,
+          msg: allProducts
+        }
+      };
+    } else {
+      return {
+        error: {
+          status: 204
+        }
+      };
+    }
   }
 }
 

@@ -10,9 +10,11 @@
   "dependencies": {
     "@hapi/joi": "^15.1.1",
     "cookie-parser": "~1.4.3",
+    "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "debug": "~2.6.9",
     "express": "~4.16.0",
+    "express-winston": "^3.3.0",
     "fs": "0.0.1-security",
     "hbs": "~4.0.1",
     "helmet": "^3.18.0",
@@ -23,7 +25,8 @@
     "mongoose": "^5.7.0",
     "morgan": "~1.9.0",
     "rimraf": "^2.6.3",
-    "validator": "^11.1.0"
+    "validator": "^11.1.0",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

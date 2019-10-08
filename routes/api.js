@@ -5,59 +5,94 @@ var userLogin = require('../api/userLogin');
 var addProduct = require('../api/addProduct');
 var deleteProduct = require('../api/deleteProduct');
 var getProducts = require('../api/getProducts');
+var addOrder = require('../api/addOrder');
+var {isAuthorize, isAdmin} = require('../utils/authorize');
 
 /* Login */
 router.post('/login', async function(req, res, next) {
-  const userInfo = await userLogin(req.body);
+  const Info = await userLogin(req.body);
 
-  if (Object.prototype.hasOwnProperty.call(userInfo, 'error')) {
-    res.status(400).send(userInfo.error);
+  if (Object.prototype.hasOwnProperty.call(Info, 'error')) {
+    res.status(Info.error.status).send(Info.error);
   } else {
-    res.status(userInfo.status).send(userInfo.msg);
+    res.status(Info.status).send(Info.msg);
   }
 });
 
 /* Registration */
 router.post('/register', async function(req, res, next) {
-  const userInfo = await userProfile(req.body);
+  const Info = await userProfile(req.body);
 
-  if (Object.prototype.hasOwnProperty.call(userInfo, 'error')) {
-    res.status(400).send(userInfo.error);
+  if (Object.prototype.hasOwnProperty.call(Info, 'error')) {
+    res.status(Info.error.status).send(Info.error);
   } else {
-    res.status(userInfo.status).send(userInfo.msg);
+    res.status(200).send(Info.msg);
   }
 });
 
 /* Add Product */
 router.post('/add-product', async function(req, res, next) {
-  const productInfo = await addProduct(req.body);
+  const admin = await isAdmin(req);
 
-  if (Object.prototype.hasOwnProperty.call(productInfo, 'error')) {
-    res.status(400).send(productInfo.error);
-  } else {
-    res.status(productInfo.status).send(productInfo.msg);
+  if (!admin) {
+    res.status(403).send('you are not authorize');
   }
+  else {
+    const Info = await addProduct(req.body);
+
+    if (Object.prototype.hasOwnProperty.call(Info, 'error')) {
+      res.status(Info.error.status).send(Info.error);
+    } else {
+      res.status(Info.status).send(Info.msg);
+    }
+  }
+
 });
 
 /* Delete Product */
 router.delete('/delete-product', async function(req, res, next) {
-  const productInfo = await deleteProduct(req.body);
+  const admin = await isAdmin(req);
 
-  if (Object.prototype.hasOwnProperty.call(productInfo, 'error')) {
-    res.status(400).send(productInfo.error);
-  } else {
-    res.status(productInfo.status).send(productInfo.msg);
+  if (!admin) {
+    res.status(403).send('you are not authorize');
+  }
+  else {
+    const Info = await deleteProduct(req.query);
+
+    if (Object.prototype.hasOwnProperty.call(Info, 'error')) {
+      res.status(Info.error.status).send(Info.error);
+    } else {
+      res.status(Info.status).send(Info.msg);
+    }
   }
 });
 
 /* Get All Products */
 router.get('/products', async function(req, res, next) {
-  const productInfo = await getProducts(req.query);
+  const Info = await getProducts(req.query);
 
-  if (Object.prototype.hasOwnProperty.call(productInfo, 'error')) {
-    res.status(400).send(productInfo.error);
+  if (Object.prototype.hasOwnProperty.call(Info, 'error')) {
+    res.status(Info.error.status).send(Info.error);
   } else {
-    res.status(productInfo.status).send(productInfo.msg);
+    res.status(Info.status).send(Info.msg);
+  }
+});
+
+/* Get All Products */
+router.post('/add-to-cart', async function(req, res, next) {
+  const user = await isAuthorize(req);
+
+  if (!user) {
+    res.status(403).send('you are not authorize');
+  }
+  else {
+    const Info = await addOrder(req.body, user);
+
+    if (Object.prototype.hasOwnProperty.call(Info, 'error')) {
+      res.status(Info.error.status).send(Info.error);
+    } else {
+      res.status(200).send(Info.msg);
+    }
   }
 });
 

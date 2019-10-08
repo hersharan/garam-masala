@@ -1,30 +1,42 @@
-const database = require("../../database");
 const Joi = require("@hapi/joi");
-const UserSchema = require("./schema");
+const UserSchema = require("../../models/users");
 const emptyValidator = Joi.string().empty();
+const emailValidation = Joi.string().email();
+const usernameValidator = Joi.string().regex(/\s?\w+\s/i);
 
-async function userProfile(userInfo) {
-  const db = await database.connection();
-  const {
-    username,
-    email,
-    password,
-    firstName,
-    lastName,
-    last,
-    dob,
-    role,
-    salutation
-  } = userInfo;
+/**
+ * Check for password, email and username properties in user object.
+ *
+ * @param {object} userInfo
+ *
+ * @returns error if exist else null.
+ */
+function handleExistenceFields(userInfo) {
   if (
     !Object.prototype.hasOwnProperty.call(userInfo, "password") ||
     !Object.prototype.hasOwnProperty.call(userInfo, "email") ||
     !Object.prototype.hasOwnProperty.call(userInfo, "username")
   ) {
     return {
-      error: { status: 400, msg: "email, username and password are mandatory" }
+      error: {
+        status: 400,
+        msg: "email, username and password are mandatory"
+      }
     };
   }
+
+  return null;
+}
+
+/**
+ * Check for password, email and username emptiness.
+ *
+ * @param {object} userInfo
+ *
+ * @returns error if exist else null.
+ */
+function handleEmptyFields(userInfo) {
+  const { username, email, password } = userInfo;
 
   if (
     emptyValidator.validate(username).error !== null ||
@@ -39,12 +51,40 @@ async function userProfile(userInfo) {
     };
   }
 
-  const emailValidation = Joi.string().email();
+  return null;
+}
+
+/**
+ * Check for email validation.
+ *
+ * @param {object} userInfo
+ *
+ * @returns error if exist else null.
+ */
+function handleEmailValidation(userInfo) {
+  const { email } = userInfo;
+
   if (emailValidation.validate(email).error !== null) {
-    return { error: { status: 400, msg: "email is not correct" } };
+    return {
+      error: {
+        status: 400,
+        msg: "email is not correct"
+      }
+    };
   }
 
-  const usernameValidator = Joi.string().regex(/\s?\w+\s/i);
+  return null;
+}
+
+/**
+ * Check for username should not contain spaces and uppercase.
+ *
+ * @param {object} userInfo
+ *
+ * @returns error if exist else null.
+ */
+function handleUsernameValidation(userInfo) {
+  const { username } = userInfo;
 
   if (usernameValidator.validate(username).error === null) {
     return {
@@ -55,40 +95,93 @@ async function userProfile(userInfo) {
     };
   }
 
-  const userExistingEmail = await db
-    .collection("users")
-    .find({ email: email })
-    .toArray();
+  return null;
+}
 
-  if (userExistingEmail.length !== 0) {
-    return { error: { status: 400, msg: "emailId already exist" } };
-  }
-  else {
-    let user = new UserSchema({
-      username,
-      email,
-      firstName,
-      lastName,
-      last,
-      dob,
-      role,
-      salutation
-    });
+/**
+ * Create New User.
+ *
+ * @param {object} userInfo
+ *
+ * @returns error if exist else success message.
+ */
+async function registerNewUser(userInfo) {
+  const {
+    email,
+    username,
+    firstName,
+    lastName,
+    dob,
+    role,
+    salutation,
+    password
+  } = userInfo;
 
-    user.setPassword(password);
+  try {
+    const userExistingEmail = await UserSchema.find({ email: email });
 
-    const mongoStatus = await user.save().catch(err => err);
+    if (userExistingEmail.length !== 0) {
+      return { error: { status: 400, msg: "emailId already exist" } };
+    } else {
+      try {
+        let user = new UserSchema({
+          username,
+          email,
+          firstName,
+          lastName,
+          dob,
+          role,
+          salutation,
+        });
 
-    if (
-      mongoStatus !== undefined &&
-      Object.prototype.hasOwnProperty.call(mongoStatus, "name") &&
-      mongoStatus.name === "MongoError"
-    ) {
-      return { status: 500, msg: mongoStatus.errmsg };
+        user.setPassword(password);
+        await user.save();
+
+        return { status: 201, msg: `${username} user has been created` };
+      } catch (err) {
+        return { error: { status: 500, msg: err.toString() } };
+      }
     }
-
-    return { status: 201, msg: `${username} user has been created` };
+  } catch (err) {
+    return { error: { status: 500, msg: err.toString() } };
   }
+}
+
+/**
+ * Check all validations.
+ *
+ * @param {object} userInfo
+ *
+ * @returns error if exist else null.
+ */
+function validation(userInfo) {
+  if (handleExistenceFields(userInfo) !== null) {
+    return handleExistenceFields(userInfo);
+  }
+
+  if (handleEmailValidation(userInfo) !== null) {
+    return handleEmailValidation(userInfo);
+  }
+
+  if (handleEmptyFields(userInfo) !== null) {
+    return handleEmptyFields(userInfo);
+  }
+
+  if (handleUsernameValidation(userInfo) !== null) {
+    return handleUsernameValidation(userInfo);
+  }
+
+  return null;
+}
+
+async function userProfile(userInfo) {
+  let result = await validation(userInfo);
+
+  if (result === null) {
+    result = await registerNewUser(userInfo);
+  }
+
+  return result;
 }
 
 module.exports = userProfile;

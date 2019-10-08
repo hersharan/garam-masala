@@ -20,7 +20,6 @@ router.get('/login', function(req, res, next) {
 /* GET Login Page */
 router.post('/register', async function(req, res, next) {
   const result = await userProfile(req, res);
-  console.log('results', result);
   res.render('register', result);
 });
 
