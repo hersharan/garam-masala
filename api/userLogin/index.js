@@ -100,7 +100,7 @@ async function userLogin(loginInfo) {
         1000, 64, `sha512`).toString(`hex`);
 
       if (userExistingEmail[0].hash !== hash) {
-        return {status: 200, msg: 'Password is not correct'}
+        return {status: 400, msg: 'Password is not correct'}
       }
     }
 

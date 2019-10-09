@@ -90,7 +90,7 @@ async function addProduct(productInfo, user) {
           status: 201,
           msg: 'Product has been added'
         }
-      }; 
+      };
     }
   }
   catch (err) {

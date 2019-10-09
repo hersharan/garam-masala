@@ -6,6 +6,7 @@ var addProduct = require('../api/addProduct');
 var deleteProduct = require('../api/deleteProduct');
 var getProducts = require('../api/getProducts');
 var addOrder = require('../api/addOrder');
+var getOrder = require('../api/getOrder');
 var {isAuthorize, isAdmin} = require('../utils/authorize');
 
 /* Login */
@@ -87,6 +88,24 @@ router.post('/add-to-cart', async function(req, res, next) {
   }
   else {
     const Info = await addOrder(req.body, user);
+
+    if (Object.prototype.hasOwnProperty.call(Info, 'error')) {
+      res.status(Info.error.status).send(Info.error);
+    } else {
+      res.status(200).send(Info.msg);
+    }
+  }
+});
+
+/* Get All Products */
+router.get('/get-my-order', async function(req, res, next) {
+  const user = await isAuthorize(req);
+
+  if (!user) {
+    res.status(403).send('you are not authorize');
+  }
+  else {
+    const Info = await getOrder(user);
 
     if (Object.prototype.hasOwnProperty.call(Info, 'error')) {
       res.status(Info.error.status).send(Info.error);
