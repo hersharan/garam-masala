@@ -137,6 +137,11 @@ h2.active {
 .underlineHover:hover:after {
   width: 100%;
 }
+.error-login {
+  color: red;
+  border: 1px solid red;
+  background-color: rgb(255, 183, 183)
+}
 
 /* OTHERS */
 
@@ -212,7 +217,7 @@ h2.active {
   /*background: blue;*/ /*make it blue*/
 }
 .toggle_option_slider {
- font-weight: bold;
+  font-weight: bold;
   /*display: none;*/
   /*background: red;*/
   width: 100px;
@@ -242,3 +247,39 @@ h2.active {
   left: 215px;
 }
 /*Checkbox end*/
+
+/*Image preview start */
+.preview_image_container {
+  max-width: 85%;
+  margin: 5px;
+  border-radius: 5px 5px 5px 5px;
+}
+/*Image preview end */
+
+/*Nav bar start*/
+.cst-nav {
+  color: red;
+}
+/*Nav bar end*/
+
+/*Footer start*/
+.cst-footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+}
+/*Footer end*/
+
+/*Product box start*/
+
+.product div {
+  height: 250px;
+  /* max-width: 20% !important;*/
+  /* margin-right: 5%; */
+  /* display: flexbox;
+  flex-flow: row; */
+  text-align: center;
+}
+
+/*Product box end*/

@@ -1,8 +1,10 @@
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import Axios from "axios";
 
 // eslint-disable-next-line
 const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const dateRegex = /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/;
 
 export default class Register extends React.Component {
   constructor() {
@@ -16,10 +18,23 @@ export default class Register extends React.Component {
         dob: "",
         username: "",
         role: "",
-        address: ""
+        address: "",
+        password: ""
+      },
+      response: {
+        message: ""
       }
     };
   }
+  handleRegisterSubmit = values => {
+    Axios.post("http://localhost:3000/api/v1/register", values)
+      .then(Response => {
+        console.log(Response);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
   render() {
     const {
       salutation,
@@ -29,7 +44,8 @@ export default class Register extends React.Component {
       dob,
       username,
       role,
-      address
+      address,
+      password
     } = this.state.formVal;
     return (
       <React.Fragment>
@@ -38,14 +54,15 @@ export default class Register extends React.Component {
           <div id="formContent" className="w-100">
             <Formik
               initialValues={{
-                salutation: salutation,
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                dob: dob,
-                username: username,
-                role: role,
-                address: address
+                salutation,
+                firstName,
+                lastName,
+                email,
+                dob,
+                username,
+                role,
+                address,
+                password
               }}
               validate={values => {
                 let errors = {};
@@ -65,6 +82,8 @@ export default class Register extends React.Component {
                 }
                 if (!values.dob) {
                   errors.dob = "Required";
+                } else if (dateRegex.test(values.dob) === false) {
+                  errors.dob = "Invalid Date Or Format";
                 }
                 if (!values.username) {
                   errors.username = "Required";
@@ -75,6 +94,9 @@ export default class Register extends React.Component {
                 if (!values.address) {
                   errors.address = "Required";
                 }
+                if (!values.password) {
+                  errors.password = "Required";
+                }
                 return errors;
               }}
               onSubmit={values => {
@@ -82,6 +104,7 @@ export default class Register extends React.Component {
                   formVal: values
                 });
                 alert(JSON.stringify(values));
+                this.handleRegisterSubmit(values);
               }}
             >
               <Form className="mt-4 mb-4">
@@ -122,10 +145,22 @@ export default class Register extends React.Component {
                 />
 
                 <Field
-                  type="date"
+                  type="password"
+                  className="mt-3 cst-input"
+                  name="password"
+                  placeholder="PASSWORD"
+                />
+                <ErrorMessage
+                  component="div"
+                  name="password"
+                  className="error-msg"
+                />
+
+                <Field
+                  type="text"
                   className="mt-3 cst-input"
                   name="dob"
-                  placeholder="Date Of Birth"
+                  placeholder="DATE OF BIRTH(DD/MM/YYYY)"
                 />
                 <ErrorMessage
                   component="div"
