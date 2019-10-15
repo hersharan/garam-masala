@@ -78,20 +78,16 @@ async function addProduct(productInfo, user) {
   };
 
   try {
-    const data = await OrdersSchema.findOneAndUpdate(
+    await OrdersSchema.findOneAndUpdate(
       { uid: user.uid._id },
       { $addToSet: { items: product }, status: 0 },
       { upsert: true }
     );
 
-    if (data !== null) {
-      return {
-        error: {
-          status: 201,
-          msg: 'Product has been added'
-        }
-      };
-    }
+    return {
+      status: 200,
+      msg: 'Product has been added'
+    };
   }
   catch (err) {
     return {
@@ -104,7 +100,7 @@ async function addProduct(productInfo, user) {
 }
 
 async function addOrder(info, user) {
-  let result = await validation(info);
+  let result = validation(info);
 
   if (result === null) {
     result = await addProduct(info, user);

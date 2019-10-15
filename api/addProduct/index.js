@@ -168,13 +168,12 @@ async function handleDetails(details, id) {
       Object.prototype.hasOwnProperty.call(item, 'weight') &&
       Object.prototype.hasOwnProperty.call(item, 'cost')
     ) {
-      const variety = new EstimateModel({
-        weight: item.weight,
-        cost: item.cost,
-        pid: id
-      });
       try {
-        await variety.save();
+        await EstimateModel.create({
+          weight: item.weight,
+          cost: item.cost,
+          pid: id
+        });
       }
       catch(err) {
         return {
@@ -186,6 +185,11 @@ async function handleDetails(details, id) {
       }
     }
   })
+
+  return {
+    status: 200,
+    msg: 'Product has been added'
+  }
 }
 
 async function addProduct(productInfo) {
@@ -197,17 +201,15 @@ async function addProduct(productInfo) {
   }
 
   try {
-    const product = new ProductModel({
+    const product = await ProductModel.create({
       title,
       description,
       image: imageFile.path,
       extension: imageFile.extension,
     });
 
-    const productStatus = await product.save();
-
-    if (productStatus !== null) {
-      await handleDetails(details, productStatus._id);
+    if (product !== null) {
+      return await handleDetails(details, product._id);
     }
 
     return {

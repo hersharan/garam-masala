@@ -6,7 +6,7 @@ const OrdersSchema = new Schema({
   items: {type: Array, default: []},
   status: {type: Boolean, default: 0},
   totalAmount: {type: Number, default: 0},
-  createdDate: {type: Date, default: Date.now},
+  createdDate: {type: Date, default: Date.now()},
   completedDate: {type: Date, default: null}
 });
 

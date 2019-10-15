@@ -7,6 +7,7 @@ var deleteProduct = require('../api/deleteProduct');
 var getProducts = require('../api/getProducts');
 var addOrder = require('../api/addOrder');
 var getOrder = require('../api/getOrder');
+var completeOrder = require('../api/completeOrder');
 var {isAuthorize, isAdmin} = require('../utils/authorize');
 
 /* Login */
@@ -92,7 +93,7 @@ router.post('/add-to-cart', async function(req, res, next) {
     if (Object.prototype.hasOwnProperty.call(Info, 'error')) {
       res.status(Info.error.status).send(Info.error);
     } else {
-      res.status(200).send(Info.msg);
+      res.status(Info.status).send(Info.msg);
     }
   }
 });
@@ -110,7 +111,30 @@ router.get('/get-my-order', async function(req, res, next) {
     if (Object.prototype.hasOwnProperty.call(Info, 'error')) {
       res.status(Info.error.status).send(Info.error);
     } else {
-      res.status(200).send(Info.msg);
+      res.status(Info.status).send(Info.msg);
+    }
+  }
+});
+
+/* Get All Products */
+router.get('/roles', async function(req, res, next) {
+  res.status(200).send({customer:'Customer', seller: 'Seller'});
+});
+
+/* Get All Products */
+router.get('/complete-order', async function(req, res, next) {
+  const user = await isAuthorize(req);
+
+  if (!user) {
+    res.status(403).send('you are not authorize');
+  }
+  else {
+    const Info = await completeOrder(user);
+
+    if (Object.prototype.hasOwnProperty.call(Info, 'error')) {
+      res.status(Info.error.status).send(Info.error);
+    } else {
+      res.status(Info.status).send(Info.msg);
     }
   }
 });

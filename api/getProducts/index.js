@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const ProductModel = require("../../models/products");
 const EstimateModel = require("../../models/estimate");
-const filesFolder = `./public/files`;
+const filesFolder = `/files`;
 
 function handleProductId(product) {
   let productsId = [];
